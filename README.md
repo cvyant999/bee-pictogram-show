@@ -2,7 +2,7 @@
 
 Tokyo-2020-style pictogram performance tool for the BEE 청년부 talent show (Gospel of John: 7 signs, 7 "I am"s, the cross, "feed my sheep").
 
-**Live:** https://cvyant999.github.io/bee-pictogram-show/
+**Live tool:** https://cvyant999.github.io/bee-pictogram-show/ · **Group presentation:** https://cvyant999.github.io/bee-pictogram-show/plan.html
 
 ## How it works
 - A laptop in the front row points its webcam at the performers; the laptop's screen is mirrored to the projector.
