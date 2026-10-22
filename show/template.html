@@ -33,7 +33,7 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
   <button id="go" disabled>불러오는 중…</button>
   <p>스페이스 = 일시정지 · → 다음 · ← 이전 · F = 전체화면 · M = 음소거 · Esc = 처음으로</p>
 </div>
-<audio id="bgm" src="bgm.mp3" preload="auto"></audio>
+<audio id="bgm" preload="auto"></audio>
 <script>
 const S=__SLIDES__;
 // Beat (seconds into the track) for each scene: 0:16 then every 4s ... 1:44, 1:48, then the short gap 1:50, 1:54.
@@ -45,9 +45,11 @@ const $=id=>document.getElementById(id), A=$('bgm'), F=$('frame');
 // Preload + decode every image into its own <img>: a swap is instant and never shows an old/half-loaded picture.
 const IMGS=[{src:'intro.jpg',t:'등장!'}].concat(S.map(s=>({src:'p/'+s.id+'.jpg',t:s.t})));
 let loaded=0,audioOK=false;
-const els=IMGS.map(o=>{const im=new Image();im.src=o.src;F.appendChild(im);
-  const done=()=>{loaded++;prog()};(im.decode?im.decode():new Promise(r=>im.onload=r)).then(done,done);return im});
-A.addEventListener('canplaythrough',()=>{audioOK=true;prog()},{once:true});A.load();
+const els=IMGS.map(o=>{const im=new Image();let c=false;const done=()=>{if(c)return;c=true;loaded++;prog();if(im.decode)im.decode().catch(()=>{})};
+  im.onload=done;im.onerror=done;im.src=o.src;F.appendChild(im);if(im.complete)done();return im});
+// Download the whole track first (blob), so playback never stalls mid-show.
+fetch('bgm.mp3').then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{audioOK=true;prog()});
+setTimeout(()=>{if($('go').disabled){audioOK=true;loaded=IMGS.length;prog()}},20000); // safety: never stay stuck on loading
 function prog(){const p=(loaded+(audioOK?1:0))/(IMGS.length+1);$('load').firstChild.style.width=(p*100)+'%';
   if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='▶ 시작';
    $('info').textContent=S.length+'장면 · 첫 장면 0:16 · 4초마다 · 2:20 페이드아웃';}}
