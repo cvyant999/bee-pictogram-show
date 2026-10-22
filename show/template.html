@@ -121,7 +121,7 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
   function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
   function start(){$('menu').style.display='none';$('pre').style.display='grid';cur=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
   function menu(){A.pause();cancelAnimationFrame(raf);ch&&ch.postMessage({type:'show',k:-99});cur=-99;$('pre').style.display='none';$('menu').style.display='flex';ping();}
-  $('go').onclick=start;
+  $('go').onclick=start; window.__step=()=>{const t=A.currentTime,k=sceneAt(t);if(k!==cur)show(k);};
   addEventListener('keydown',e=>{if($('menu').style.display!=='none'){if(e.key==='Enter'&&!$('go').disabled)start();return}
     if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(cur+1);else if(e.key==='ArrowLeft')seekScene(cur-1);
     else if(e.key==='m'||e.key==='M')A.muted=!A.muted;else if(e.key==='Escape')menu();});
