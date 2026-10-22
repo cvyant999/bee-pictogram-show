@@ -5,74 +5,125 @@
 :root{--ink:#1f2a6b}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sans KR",-apple-system,sans-serif;overflow:hidden;color:var(--ink)}
-#stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#frame{position:relative;width:min(78vh,90vw);height:min(78vh,90vw)}
-#frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;visibility:hidden}
-#frame img.on{visibility:visible}
-#frame img.pop{animation:pop .2s cubic-bezier(.2,.9,.3,1.3) both}
+.frame{position:relative}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;visibility:hidden}
+.frame img.on{visibility:visible}
+.frame img.pop{animation:pop .2s cubic-bezier(.2,.9,.3,1.3) both}
 @keyframes pop{0%{transform:scale(.55)}100%{transform:scale(1)}}
-#title{font-size:5vh;font-weight:800;margin-top:1.5vh;min-height:6vh;text-align:center}
-#num{position:fixed;right:3vh;bottom:2vh;font-size:3vh;font-weight:800;opacity:.5}
-#bar{position:fixed;left:0;bottom:0;height:.8vh;background:var(--ink);width:0}
-#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none}
-#menu{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:var(--ink);color:#fff;text-align:center;z-index:5;padding:4vh}
-#menu h1{font-size:7vh}#menu p{opacity:.8;font-size:2.2vh;line-height:1.7}
-#menu button{font-size:4vh;font-weight:800;padding:2vh 7vh;border:0;border-radius:2vh;background:#fff;color:var(--ink);cursor:pointer}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+/* ===== audience view (TV) ===== */
+#aud{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center}
+#aud .frame{width:min(80vh,92vw);height:min(80vh,92vw)}
+#aTitle{font-size:5vh;font-weight:800;margin-top:1.5vh;min-height:6vh;text-align:center}
+#aBar{position:fixed;left:0;bottom:0;height:.8vh;background:var(--ink);width:0}
+#aWait{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2vh;background:var(--ink);color:#fff;font-size:3vh;text-align:center;z-index:3;line-height:1.6}
+#aWait b{font-size:6vh}
+/* ===== presenter view (laptop, faces the actors) ===== */
+#pre{position:fixed;inset:0;display:none;grid-template-columns:1fr 1.7fr;grid-template-rows:auto 1fr auto;gap:1.5vh;padding:2vh;background:#0f1433;color:#fff}
+#pre h2{font-size:2.4vh;opacity:.7;font-weight:700;margin-bottom:.8vh}
+#pNow,#pNext{background:#fff;border-radius:1.5vh;padding:1.5vh;color:var(--ink);display:flex;flex-direction:column;min-height:0}
+#pNow{grid-row:2;grid-column:1}#pNext{grid-row:2;grid-column:2;outline:.6vh solid #ffd54a}
+#pNow .frame,#pNext .frame{flex:1;min-height:0}
+.lbl{font-size:3vh;font-weight:800;margin:.6vh 0}.pose{font-size:2.6vh;line-height:1.35}.staff{font-size:2.4vh;color:#7b1fa2;font-weight:700;margin-top:.6vh}
+#pTop{grid-column:1/3;display:flex;align-items:center;justify-content:space-between;font-size:2.4vh}
+#pCount{font-size:9vh;font-weight:900;color:#ffd54a;font-variant-numeric:tabular-nums;line-height:1}
+#pBot{grid-column:1/3;display:flex;gap:2vh;align-items:center;font-size:2vh;opacity:.85}
+#pBot button{font-size:2.2vh;padding:.8vh 2vh;border:0;border-radius:1vh;font-weight:800;cursor:pointer}
+#pProg{flex:1;height:1vh;background:rgba(255,255,255,.2);border-radius:1vh;overflow:hidden}#pProg div{height:100%;background:#ffd54a;width:0}
+/* ===== start menu ===== */
+#menu{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.2vh;background:var(--ink);color:#fff;text-align:center;z-index:5;padding:4vh}
+#menu h1{font-size:6.5vh}#menu p{opacity:.85;font-size:2.1vh;line-height:1.7}
+#menu button{font-size:3.4vh;font-weight:800;padding:1.6vh 5vh;border:0;border-radius:2vh;background:#fff;color:var(--ink);cursor:pointer}
+#menu button.sec{font-size:2.4vh;padding:1.2vh 3vh;background:#ffd54a}
 #menu button:disabled{opacity:.4;cursor:wait}
-#menu label{font-size:2.2vh}
+#menu label{font-size:2.1vh}
 #load{width:40vw;height:1vh;background:rgba(255,255,255,.25);border-radius:1vh;overflow:hidden}#load div{height:100%;width:0;background:#fff;transition:width .2s}
-#paused{position:fixed;top:2vh;right:3vh;font-size:3vh;font-weight:800;display:none}
+#audState{font-size:2.1vh}
+#paused{position:fixed;top:2vh;right:3vh;font-size:3vh;font-weight:800;display:none;z-index:6;color:#ffd54a}
 </style></head><body>
-<div id="stage"><div id="frame"></div><div id="title"></div></div>
-<div id="num"></div><div id="bar"></div><div id="flash"></div><div id="paused">⏸ 일시정지</div>
+<div id="flash"></div><div id="paused">⏸ 일시정지</div>
+
+<div id="aud">
+  <div class="frame" id="aFrame"></div><div id="aTitle"></div><div id="aBar"></div>
+  <div id="aWait"><b>관객 화면 (TV)</b>이 창을 TV로 옮긴 뒤 클릭하거나 F 키 → 전체화면<br>노트북에서 ▶ 시작을 누르면 여기서 재생됩니다</div>
+</div>
+
+<div id="pre">
+  <div id="pTop"><div><b>배우용 화면</b> · 노란 칸 = 다음 장면 (박자에 맞춰 TV에 나옴)</div><div style="text-align:right">다음 박자까지<div id="pCount">–</div></div></div>
+  <div id="pNow"><h2>지금 TV 화면</h2><div class="frame" id="nowFrame"></div><div class="lbl" id="nowLbl"></div></div>
+  <div id="pNext"><h2>다음 ▶ 준비!</h2><div class="frame" id="nextFrame"></div><div class="lbl" id="nextLbl"></div><div class="pose" id="nextPose"></div><div class="staff" id="nextStaff"></div></div>
+  <div id="pBot"><span id="pTime">0:00</span><div id="pProg"><div></div></div><span>스페이스 일시정지 · ←/→ 장면 이동 · Esc 메뉴</span><button id="reopen">관객 화면 다시 열기</button></div>
+</div>
+
 <div id="menu">
   <h1>BEE 픽토그램 쇼</h1>
   <p>요한복음: 일곱 표징 · '나는 ~이다' · 십자가 · 내 양을 먹이라<br><span id="info">불러오는 중…</span></p>
   <div id="load"><div></div></div>
+  <p><b>2화면 사용법</b> (TV 연결, 디스플레이 '확장' 모드)<br>① <b>관객 화면 열기</b> → 새 창을 TV로 끌어다 놓고 클릭 또는 F 키로 전체화면<br>② 이 노트북 화면을 배우 쪽으로 돌림 → ③ <b>▶ 시작</b> (음악은 노트북에서 재생)</p>
+  <button class="sec" id="openAud">① 관객 화면 열기 (TV)</button><div id="audState">관객 화면: 없음 (없으면 이 화면 하나로 재생)</div>
   <label><input id="click" type="checkbox"> 찰칵 효과음 (음악에 이미 있으면 끄기)</label>
   <button id="go" disabled>불러오는 중…</button>
-  <p>스페이스 = 일시정지 · → 다음 · ← 이전 · F = 전체화면 · M = 음소거 · Esc = 처음으로</p>
 </div>
 <audio id="bgm" preload="auto"></audio>
 <script>
 const S=__SLIDES__;
-// Beat (seconds into the track) for each scene: 0:16 then every 4s ... 1:44, 1:48, then the short gap 1:50, 1:54.
-const BEAT=S.map((_,k)=>16+4*k);
-if(S.length===26){BEAT[24]=110;BEAT[25]=114;}
-const LEAD=0.4;                 // show each pictogram this much before its beat (covers pop-in)
-const AMEN=118, FADE_FROM=124, FADE_TO=140;   // 1:58 아멘 · 2:04 fade starts · 2:20 silent
-const $=id=>document.getElementById(id), A=$('bgm'), F=$('frame');
-// Preload + decode every image into its own <img>: a swap is instant and never shows an old/half-loaded picture.
-const IMGS=[{src:'intro.jpg',t:'등장!'}].concat(S.map(s=>({src:'p/'+s.id+'.jpg',t:s.t})));
-let loaded=0,audioOK=false;
-const els=IMGS.map(o=>{const im=new Image();let c=false;const done=()=>{if(c)return;c=true;loaded++;prog();if(im.decode)im.decode().catch(()=>{})};
-  im.onload=done;im.onerror=done;im.src=o.src;F.appendChild(im);if(im.complete)done();return im});
-// Download the whole track first (blob), so playback never stalls mid-show.
-fetch('bgm.mp3').then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{audioOK=true;prog()});
-setTimeout(()=>{if($('go').disabled){audioOK=true;loaded=IMGS.length;prog()}},20000); // safety: never stay stuck on loading
-function prog(){const p=(loaded+(audioOK?1:0))/(IMGS.length+1);$('load').firstChild.style.width=(p*100)+'%';
-  if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='▶ 시작';
-   $('info').textContent=S.length+'장면 · 첫 장면 0:16 · 4초마다 · 2:20 페이드아웃';}}
-let cur=-99,ctx=null,raf=0;
-function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.6;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}
- const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .3s';f.style.opacity=0});}
-// k = -1 intro (cast enters the stage), 0..n-1 scenes, n = 아멘
-function show(k){cur=k;els.forEach(e=>e.classList.remove('on','pop'));
- if(k>=S.length){$('title').textContent='아멘 🙏';$('num').textContent='';$('bar').style.width='100%';return}
- const e=els[k+1];void e.offsetWidth;e.classList.add('on');if(k>=0)e.classList.add('pop');
- $('title').textContent=IMGS[k+1].t;$('num').textContent=k>=0?(k+1)+' / '+S.length:'';$('bar').style.width=k>=0?((k+1)/S.length*100)+'%':'0';
- if(k>=0&&$('click').checked)shutter();}
-function sceneAt(t){if(t>=AMEN-LEAD)return S.length;let k=-1;for(let j=0;j<S.length;j++)if(t>=BEAT[j]-LEAD)k=j;return k;}
-function tick(){const t=A.currentTime,k=sceneAt(t);if(k!==cur)show(k);
- if(t>=FADE_FROM){const v=Math.max(0,1-(t-FADE_FROM)/(FADE_TO-FADE_FROM));A.volume=v;if(v<=0)A.pause();}else A.volume=1;
- raf=requestAnimationFrame(tick);}
-function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=BEAT[k]-LEAD+0.01;}
-function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
-function start(){$('menu').style.display='none';cur=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
-function menu(){A.pause();cancelAnimationFrame(raf);$('menu').style.display='flex';}
-$('go').onclick=start;
-addEventListener('keydown',e=>{if($('menu').style.display!=='none'){if(e.key==='Enter'&&!$('go').disabled)start();return}
- if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(cur+1);else if(e.key==='ArrowLeft')seekScene(cur-1);
- else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
- else if(e.key==='m'||e.key==='M')A.muted=!A.muted;else if(e.key==='Escape')menu();});
+// beat times: 0:16 then every 4s ... 1:44, 1:48, short gap 1:50, 1:54 · 아멘 1:58 · fade 2:04→2:20
+const BEAT=S.map((_,k)=>16+4*k); if(S.length===26){BEAT[24]=110;BEAT[25]=114;}
+const LEAD=0.4, AMEN=118, FADE_FROM=124, FADE_TO=140;
+const $=id=>document.getElementById(id);
+const IS_AUD=new URLSearchParams(location.search).get('view')==='audience';
+const ch=('BroadcastChannel' in window)?new BroadcastChannel('bee-pictogram-show'):null;
+const IMGS=[{src:'intro.jpg',t:'등장!',pose:'세 사람이 무대로 걸어 들어옴',staff:''}].concat(S.map(s=>({src:'p/'+s.id+'.jpg',t:s.t,pose:s.pose,staff:s.staff})));
+function mkSet(frame,onload){return IMGS.map(o=>{const im=new Image();let c=false;const d=()=>{if(c)return;c=true;onload&&onload();if(im.decode)im.decode().catch(()=>{})};im.onload=d;im.onerror=d;im.src=o.src;frame.appendChild(im);if(im.complete)d();return im})}
+function setImg(set,k,pop){set.forEach(e=>e.classList.remove('on','pop'));if(k<-1||k>=S.length)return;const e=set[k+1];void e.offsetWidth;e.classList.add('on');if(pop&&k>=0)e.classList.add('pop')}
+function flash(){const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .3s';f.style.opacity=0})}
+
+if(IS_AUD){ /* ================= TV / audience window ================= */
+  document.title='BEE 픽토그램 쇼 – 관객 화면';$('aud').style.display='flex';
+  const set=mkSet($('aFrame'));let cur=-99;
+  const fs=()=>{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{});};
+  addEventListener('click',fs);addEventListener('keydown',e=>{if(e.key==='f'||e.key==='F')fs()});
+  function aShow(k){if(k===cur)return;cur=k;
+    if(k===-99){$('aWait').style.display='flex';setImg(set,-99);$('aTitle').textContent='';return}
+    $('aWait').style.display='none';
+    if(k>=S.length){setImg(set,-99);$('aTitle').textContent='아멘 🙏';$('aBar').style.width='100%';return}
+    setImg(set,k,true);$('aTitle').textContent=IMGS[k+1].t;$('aBar').style.width=k>=0?((k+1)/S.length*100)+'%':'0';if(k>=0)flash();}
+  ch&&ch.addEventListener('message',e=>{const m=e.data;if(m.type==='show')aShow(m.k);else if(m.type==='ping')ch.postMessage({type:'pong'})});
+  ch&&ch.postMessage({type:'pong'});
+} else { /* ================= laptop: presenter view + music ================= */
+  const A=$('bgm');$('menu').style.display='flex';
+  let loaded=0,audioOK=false,audAlive=false;
+  const nowSet=mkSet($('nowFrame'),()=>{loaded++;prog()}), nextSet=mkSet($('nextFrame'));
+  fetch('bgm.mp3').then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{A.src='bgm.mp3';audioOK=true;prog()});
+  setTimeout(()=>{if($('go').disabled){audioOK=true;loaded=IMGS.length;prog()}},20000);
+  function prog(){const p=(loaded+(audioOK?1:0))/(IMGS.length+1);$('load').firstChild.style.width=(p*100)+'%';
+    if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='② ▶ 시작';$('info').textContent=S.length+'장면 · 첫 장면 0:16 · 4초마다 · 2:20 페이드아웃';}}
+  function openAud(){window.open(location.pathname+'?view=audience','bee_audience','popup,width=1280,height=720');setTimeout(ping,1500)}
+  function ping(){audAlive=false;ch&&ch.postMessage({type:'ping'});setTimeout(()=>{$('audState').textContent=audAlive?'관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)':'관객 화면: 없음 (없으면 이 화면 하나로 재생)'},500)}
+  ch&&ch.addEventListener('message',e=>{if(e.data.type==='pong'){audAlive=true;$('audState').textContent='관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)'}});
+  $('openAud').onclick=openAud;$('reopen').onclick=openAud;
+  let cur=-99,ctx=null,raf=0;
+  function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.6;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}}
+  function info(k,lbl,pose,staff){if(k>=S.length){lbl.textContent='아멘 🙏 (끝)';if(pose)pose.textContent='';if(staff)staff.textContent='';return}
+    const o=IMGS[k+1];lbl.textContent=(k>=0?(k+1)+'. ':'')+o.t;if(pose)pose.textContent=o.pose||'';if(staff)staff.textContent=o.staff?('▶ '+o.staff):'';}
+  function show(k){cur=k;ch&&ch.postMessage({type:'show',k});
+    setImg(nowSet,k,true);info(k,$('nowLbl'));
+    const n=Math.min(k+1,S.length);setImg(nextSet,n<S.length?n:-99,false);info(n,$('nextLbl'),$('nextPose'),$('nextStaff'));
+    if(k>=0&&k<S.length&&$('click').checked)shutter();}
+  function sceneAt(t){if(t>=AMEN-LEAD)return S.length;let k=-1;for(let j=0;j<S.length;j++)if(t>=BEAT[j]-LEAD)k=j;return k;}
+  const mmss=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
+  function tick(){const t=A.currentTime,k=sceneAt(t);if(k!==cur)show(k);
+    const nb=k+1<S.length?BEAT[k+1]:(k+1===S.length?AMEN:null);$('pCount').textContent=nb!=null?Math.max(0,nb-LEAD-t).toFixed(1):'–';
+    $('pTime').textContent=mmss(t);$('pProg').firstChild.style.width=Math.min(100,t/FADE_TO*100)+'%';
+    if(t>=FADE_FROM){const v=Math.max(0,1-(t-FADE_FROM)/(FADE_TO-FADE_FROM));A.volume=v;if(v<=0)A.pause();}else A.volume=1;
+    raf=requestAnimationFrame(tick);}
+  function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=BEAT[k]-LEAD+0.01;}
+  function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
+  function start(){$('menu').style.display='none';$('pre').style.display='grid';cur=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
+  function menu(){A.pause();cancelAnimationFrame(raf);ch&&ch.postMessage({type:'show',k:-99});cur=-99;$('pre').style.display='none';$('menu').style.display='flex';ping();}
+  $('go').onclick=start;
+  addEventListener('keydown',e=>{if($('menu').style.display!=='none'){if(e.key==='Enter'&&!$('go').disabled)start();return}
+    if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(cur+1);else if(e.key==='ArrowLeft')seekScene(cur-1);
+    else if(e.key==='m'||e.key==='M')A.muted=!A.muted;else if(e.key==='Escape')menu();});
+}
 </script></body></html>
