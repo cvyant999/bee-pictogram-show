@@ -33,7 +33,7 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
 const S=__SLIDES__;
 const $=id=>document.getElementById(id), A=$('bgm');
 S.forEach(s=>{const i=new Image();i.src='p/'+s.id+'.jpg'});
-let i=-1,timer=null,per=10.8,paused=false,t0=0,left=0,ctx=null;
+let i=-1,timer=null,per=11.1,paused=false,t0=0,left=0,ctx=null;
 function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}
  const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});}
 function show(k){if(k<0)k=0;if(k>=S.length){end();return}i=k;const p=$('pic');p.classList.remove('pop');void p.offsetWidth;p.src='p/'+S[i].id+'.jpg';p.classList.add('pop');
