@@ -24,7 +24,7 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
 <div id="menu">
   <h1>BEE 픽토그램 쇼</h1>
   <p>요한복음: 일곱 표징 · '나는 ~이다' · 십자가 · 내 양을 먹이라<br><span id="info"></span></p>
-  <label>장면당 초 <input id="sec" type="number" min="4" max="30" step="0.5"> (기본: 음악 길이에 맞춤)</label>
+  <label><input id="click" type="checkbox"> 찰칵 효과음 (음악에 이미 있으면 끄기)</label>
   <button id="go">▶ 시작</button>
   <p>스페이스 = 일시정지 · → 다음 · ← 이전 · F = 전체화면 · M = 음소거 · Esc = 처음으로</p>
 </div>
@@ -33,20 +33,27 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
 const S=[{"id": "01a", "t": "물이 포도주로 (1)"}, {"id": "01b", "t": "물이 포도주로 (2)"}, {"id": "02a", "t": "왕의 신하의 아들 (1)"}, {"id": "02b", "t": "왕의 신하의 아들 (2)"}, {"id": "03a", "t": "베데스다 연못 (1)"}, {"id": "03b", "t": "베데스다 연못 (2)"}, {"id": "04a", "t": "오병이어 (1)"}, {"id": "04b", "t": "오병이어 (2)"}, {"id": "05a", "t": "물 위를 걸으심 (1)"}, {"id": "05b", "t": "물 위를 걸으심 (2)"}, {"id": "06a", "t": "날 때부터 맹인 된 자 (1)"}, {"id": "06b", "t": "날 때부터 맹인 된 자 (2)"}, {"id": "07a", "t": "나사로를 살리심 (1)"}, {"id": "07b", "t": "나사로를 살리심 (2)"}, {"id": "08", "t": "나는 생명의 떡이다"}, {"id": "09", "t": "나는 세상의 빛이다"}, {"id": "10a", "t": "나는 양의 문이다 (1)"}, {"id": "10b", "t": "나는 양의 문이다 (2)"}, {"id": "11", "t": "나는 선한 목자다"}, {"id": "12a", "t": "나는 부활이요 생명이다 (1)"}, {"id": "12b", "t": "나는 부활이요 생명이다 (2)"}, {"id": "13", "t": "나는 길이요 진리요 생명이니"}, {"id": "14", "t": "나는 참포도나무다"}, {"id": "15", "t": "십자가"}, {"id": "16a", "t": "내 양을 먹이라 (1)"}, {"id": "16b", "t": "내 양을 먹이라 (2)"}];
 const $=id=>document.getElementById(id), A=$('bgm');
 S.forEach(s=>{const i=new Image();i.src='p/'+s.id+'.jpg'});
-let i=-1,timer=null,per=11.1,paused=false,t0=0,left=0,ctx=null;
-function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}
- const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0});}
-function show(k){if(k<0)k=0;if(k>=S.length){end();return}i=k;const p=$('pic');p.classList.remove('pop');void p.offsetWidth;p.src='p/'+S[i].id+'.jpg';p.classList.add('pop');
- $('title').textContent=S[i].t;$('num').textContent=(i+1)+' / '+S.length;$('bar').style.width=((i+1)/S.length*100)+'%';shutter();schedule(per*1000);}
-function schedule(ms){clearTimeout(timer);left=ms;t0=performance.now();timer=setTimeout(()=>show(i+1),ms);}
-function pause(){if(paused){paused=false;$('paused').style.display='none';A.play();schedule(left);}else{paused=true;$('paused').style.display='block';A.pause();clearTimeout(timer);left-=performance.now()-t0;}}
-function end(){clearTimeout(timer);$('title').textContent='아멘 🙏';let v=1;const fade=setInterval(()=>{v-=.05;A.volume=Math.max(v,0);if(v<=0){clearInterval(fade);A.pause();}},150);}
-function start(){const v=parseFloat($('sec').value);per=v>0?v:per;$('menu').style.display='none';A.currentTime=0;A.volume=1;A.play().catch(()=>{});paused=false;show(0);}
-function menu(){clearTimeout(timer);A.pause();$('menu').style.display='flex';}
-A.addEventListener('loadedmetadata',()=>{per=Math.round(A.duration/S.length*10)/10;$('sec').value=per;$('info').textContent=S.length+'장면 · 음악 '+Math.floor(A.duration/60)+':'+String(Math.round(A.duration%60)).padStart(2,'0');});
-$('sec').value=per;$('go').onclick=start;
+let i=-1,ctx=null,raf=0,ended=false;
+const FIRST=16, STEP=2;            // scene k starts at FIRST + STEP*k seconds into the track
+const T=k=>FIRST+STEP*k;
+function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.6;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}
+ const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .4s';f.style.opacity=0});}
+function show(k){i=k;const p=$('pic');
+ if(k<0){p.style.visibility='hidden';$('title').textContent='';$('num').textContent='';$('bar').style.width='0';return}
+ p.style.visibility='visible';p.classList.remove('pop');void p.offsetWidth;p.src='p/'+S[k].id+'.jpg';p.classList.add('pop');
+ $('title').textContent=S[k].t;$('num').textContent=(k+1)+' / '+S.length;$('bar').style.width=((k+1)/S.length*100)+'%';if($('click').checked)shutter();}
+function tick(){const t=A.currentTime;let k=Math.floor((t-FIRST)/STEP);if(t<FIRST)k=-1;if(k>=S.length)k=S.length-1;
+ if(k!==i)show(k);
+ if(t>=T(S.length)+1.5&&!ended){ended=true;$('title').textContent='아멘 🙏';}
+ raf=requestAnimationFrame(tick);}
+function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=T(k)+0.02;}
+function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
+function start(){$('menu').style.display='none';ended=false;i=-2;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
+function menu(){A.pause();cancelAnimationFrame(raf);$('menu').style.display='flex';}
+A.addEventListener('loadedmetadata',()=>{$('info').textContent=S.length+'장면 · 음악 '+Math.floor(A.duration/60)+':'+String(Math.round(A.duration%60)).padStart(2,'0')+' · 첫 장면 0:16, 2초마다';});
+$('go').onclick=start;
 addEventListener('keydown',e=>{if($('menu').style.display!=='none'){if(e.key==='Enter')start();return}
- if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')show(i+1);else if(e.key==='ArrowLeft')show(i-1);
+ if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(i+1);else if(e.key==='ArrowLeft')seekScene(i-1);
  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
  else if(e.key==='m'||e.key==='M')A.muted=!A.muted;else if(e.key==='Escape')menu();});
 </script></body></html>
