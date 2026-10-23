@@ -7,7 +7,9 @@ P=("Square 1:1 image. A single solid deep indigo-blue CIRCLE centered on a plain
  "Exact style of the Tokyo 2020 Olympic sport pictograms: simple and bold, strictly two colors (white and indigo), no gradients, no shading, no outlines, no text or letters, no halo. "
  "Minimalist geometric figures with round heads slightly separated from bodies, thick limbs, blank faces (except where the scene names a face mask/blindfold/sunglasses detail), max three human figures, side by side on one ground level, similar size. "
  "COSTUMES: Jesus ALWAYS wears a diagonal sash across his chest (a thin indigo band across his white body). "
- "Props are flat white silhouettes that match the shapes of the handmade props in the reference photos. Exactly ONE scene, no collage. Scene: ")
+ "STRICTLY two colors: white on deep indigo ONLY. No orange, no purple, no red, no other color anywhere, even if a reference photo has color. "
+ "IDEALIZE: draw what each prop SYMBOLIZES, not the physical prop. A paper of sun rays = real rays of light bursting outward across the whole circle; a wave strip = real water/sea; a face mask = the person's actual face expression (skull face / smiling face); eye cover = the eyes themselves (X-ed out / bright open); a door board = a real door; grape cut-outs = a real vine with grapes; paper fish/loaves = real fish and bread; a ghost cut-out = a sickness cloud/ghost hovering. "
+ "Do not draw stagehands in pictograms unless the scene is about what they do. Exactly ONE scene, no collage. Scene: ")
 S=("16:9 landscape stage BLOCKING storyboard sketch for a church youth skit. Loose black pencil line drawing on plain white paper, simple anatomically realistic human figures (mannequin-like, no detailed faces), a single horizontal stage floor line, actors side by side at the same depth with Jesus in the center. "
  "Jesus ALWAYS wears a diagonal cloth sash across his chest, colored RED (the only color besides the props). Draw handmade props so they clearly look like the reference prop photos, lightly colored like the real props. "
  "Draw ONLY the actors unless a stagehand is described below; then draw the stagehand as an extra figure in light GRAY with dashed outline. Use a few simple bold black arrows to show movement into the pose. "
@@ -26,7 +28,7 @@ def call(text,refs):
                 d=json.load(urllib.request.urlopen(r,timeout=300)); return base64.b64decode(d['choices'][0]['message']['images'][0]['image_url']['url'].split(',',1)[1])
             except Exception as e: err=f"{m}: {e}"
     raise Exception(err)
-STAFF={"03a":"crouches at the far right end shaking the '베데스다' wave strip.","04b":"crouches behind the disciple slipping loaves and fish into the basket.","05a":"crouches below holding the wave strip up under Jesus' feet.","06b":"stands behind the healed man, swapping his blindfold.","09":"stands hidden right behind Jesus holding the big yellow sun-ray poster up high.","12b":"holds the loose white cloth, having pulled it off Jesus.","14":"kneels behind supporting the leaning figures' backs."}
+STAFF={"03a":"stands behind the sick man holding the ghost cut-out up high above his head.","04b":"crouches behind the disciple slipping loaves and fish into the basket.","05a":"crouches below holding the wave strip up under Jesus' feet.","06b":"stands behind the healed man, swapping his blindfold.","09":"stands hidden right behind Jesus holding the big yellow sun-ray poster up high.","12b":"holds the loose white cloth, having pulled it off Jesus.","14":"kneels behind supporting the leaning figures' backs."}
 def refs_for(c,kind):
     R=[]
     for f in c[5]:
