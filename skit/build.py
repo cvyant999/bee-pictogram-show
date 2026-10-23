@@ -48,6 +48,9 @@ W=os.path.join(H,'..','show'); os.makedirs(W+'/p',exist_ok=True)
 for f in os.listdir(W+'/p'): os.remove(W+'/p/'+f)
 for c in C:
     if os.path.exists(f'img/p{c[0]}.jpg'): shutil.copy(f'img/p{c[0]}.jpg',f'{W}/p/{c[0]}.jpg')
+os.makedirs(W+'/s',exist_ok=True)
+for c in C:
+    if os.path.exists(f'img/s{c[0]}.jpg'): subprocess.run(['magick',f'img/s{c[0]}.jpg','-resize','900x900','-quality','78',f'{W}/s/{c[0]}.jpg'])
 import json
 sl=json.dumps([{"id":c[0],"t":c[2],"pose":c[3],"staff":c[4]} for c in C],ensure_ascii=False)
 open(W+'/index.html','w').write(open(W+'/template.html').read().replace('__SLIDES__',sl))
