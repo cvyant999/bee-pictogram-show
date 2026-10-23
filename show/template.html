@@ -75,7 +75,7 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
 </div>
 <audio id="bgm" preload="auto"></audio>
 <script>
-const S=__SLIDES__;
+const S=__SLIDES__; const VER='__VER__';
 // DINGs (seconds into the track): 0:16, then every 4s … 1:44, 1:48, short gap 1:50, 1:54, 1:58.
 // At DING[0] scene 1 appears and acting starts. At DING[k] (k>=1) scene k is "complete": its pictogram
 // pulses, then after GAP the next scene appears. After the last DING: 아멘. Music fades 2:04→2:20.
@@ -85,7 +85,7 @@ const GAP=0.35, FADE_FROM=124, FADE_TO=140;
 const $=id=>document.getElementById(id);
 const IS_AUD=new URLSearchParams(location.search).get('view')==='audience';
 const ch=('BroadcastChannel' in window)?new BroadcastChannel('bee-pictogram-show'):null;
-const IMGS=[{src:'intro.jpg',sb:'intro.jpg',t:'등장!',pose:'세 사람이 무대로 걸어 들어옴',staff:''}].concat(S.map(s=>({src:'p/'+s.id+'.jpg',sb:'s/'+s.id+'.jpg',t:s.t,pose:s.pose,staff:s.staff})));
+const IMGS=[{src:'intro.jpg?v='+VER,sb:'intro.jpg?v='+VER,t:'등장!',pose:'세 사람이 무대로 걸어 들어옴',staff:''}].concat(S.map(s=>({src:'p/'+s.id+'.jpg?v='+VER,sb:'s/'+s.id+'.jpg?v='+VER,t:s.t,pose:s.pose,staff:s.staff})));
 function mkSet(frame,onload,key){return IMGS.map(o=>{const im=new Image();let c=false;const d=()=>{if(c)return;c=true;onload&&onload();if(im.decode)im.decode().catch(()=>{})};im.onload=d;im.onerror=d;im.src=o[key||'src'];frame.appendChild(im);if(im.complete)d();return im})}
 function setImg(set,k,fx){set.forEach(e=>e.classList.remove('on','pop','pulse'));if(k<-1||k>=S.length)return;const e=set[k+1];void e.offsetWidth;e.classList.add('on');if(fx&&k>=0)e.classList.add(fx)}
 // state at time t: {k: scene index (-1 intro, S.length = 아멘), pulse: true during the GAP right after a ding}
@@ -109,7 +109,7 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
   const A=$('bgm');$('menu').style.display='flex';
   let loaded=0,audioOK=false,audAlive=false;
   const nowSet=mkSet($('nowFrame'),()=>{loaded++;prog()}), nextSet=mkSet($('nextFrame')), nowSb=mkSet($('nowSb'),()=>{loaded++;prog()},'sb'), nextSb=mkSet($('nextSb'),null,'sb');
-  fetch('bgm.mp3').then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{A.src='bgm.mp3';audioOK=true;prog()});
+  fetch('bgm.mp3?v='+VER).then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{A.src='bgm.mp3';audioOK=true;prog()});
   setTimeout(()=>{if($('go').disabled){audioOK=true;loaded=2*IMGS.length;prog()}},20000);
   function prog(){const p=(loaded+(audioOK?1:0))/(2*IMGS.length+1);$('load').firstChild.style.width=(p*100)+'%';
     if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='② ▶ 시작';$('info').textContent=S.length+'장면 · 0:16 첫 딩 = 1번 장면 시작 · 딩마다 완성 → 다음 장면 · 2:20 페이드아웃';}}
