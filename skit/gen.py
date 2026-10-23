@@ -9,7 +9,7 @@ P=("Square 1:1 image. A single solid deep indigo-blue CIRCLE centered on a plain
  "COSTUMES: Jesus ALWAYS wears a diagonal sash across his chest (a thin indigo band across his white body). "
  "STRICTLY two colors: white on deep indigo ONLY. No orange, no purple, no red, no other color anywhere, even if a reference photo has color. "
  "IDEALIZE: draw what each prop SYMBOLIZES, not the physical prop. A paper of sun rays = real rays of light bursting outward across the whole circle; a wave strip = real water/sea; a face mask = the person's actual face expression (skull face / smiling face); eye cover = the eyes themselves (X-ed out / bright open); a door board = a real door; grape cut-outs = a real vine with grapes; paper fish/loaves = real fish and bread; a ghost cut-out = a sickness cloud/ghost hovering. "
- "Do not draw stagehands in pictograms unless the scene is about what they do. Exactly ONE scene, no collage. Scene: ")
+ "NEVER draw any stagehand, helper or support person: only the actors (max three). Anything a stagehand would hold or do happens by itself (a ghost floats on its own, a cloth unwinds on its own, light shines on its own). Exactly ONE scene, no collage. Scene: ")
 S=("16:9 landscape stage BLOCKING storyboard sketch for a church youth skit. Loose black pencil line drawing on plain white paper, simple anatomically realistic human figures (mannequin-like, no detailed faces), a single horizontal stage floor line, actors side by side at the same depth with Jesus in the center. "
  "Jesus ALWAYS wears a diagonal cloth sash across his chest, colored RED (the only color besides the props). Draw handmade props so they clearly look like the reference prop photos, lightly colored like the real props. "
  "Draw ONLY the actors unless a stagehand is described below; then draw the stagehand as an extra figure in light GRAY with dashed outline. Use a few simple bold black arrows to show movement into the pose. "
@@ -40,7 +40,7 @@ def refs_for(c,kind):
     return R
 def job(kind,c):
     i=c[0]
-    if kind=='p': b=call(P+c[1],refs_for(c,'p')); open(f"{D}/pictograms/{i}.png","wb").write(b)
+    if kind=='p': b=call(P+c[1]+' (PICTOGRAM: ignore any stagehand mentioned above; do not draw them.)',refs_for(c,'p')); open(f"{D}/pictograms/{i}.png","wb").write(b)
     else:
         extra=(" Stagehand (gray, dashed): "+STAFF[i]) if i in STAFF else ""
         b=call(S+c[1]+extra,refs_for(c,'s')); open(f"{D}/storyboards/{i}.png","wb").write(b)
