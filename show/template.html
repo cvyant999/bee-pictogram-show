@@ -16,6 +16,7 @@ html,body{height:100%;background:#fff;font-family:"Apple SD Gothic Neo","Noto Sa
 /* ===== audience view (TV) ===== */
 #aud{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center}
 #aud .frame{width:min(74vh,92vw);height:min(74vh,92vw)}
+#aFrame{transform:scaleX(-1)} /* audience sees pictograms mirrored left-right (matches the actors as seen from the seats) */
 #aTitle{font-size:9vh;font-weight:900;margin-bottom:1.5vh;min-height:11vh;line-height:1.15;text-align:center}
 #aBar{position:fixed;left:0;bottom:0;height:.8vh;background:var(--ink);width:0}
 #aWait{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2vh;background:var(--ink);color:#fff;font-size:3vh;text-align:center;z-index:3;line-height:1.6}
