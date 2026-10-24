@@ -79,8 +79,10 @@ const S=__SLIDES__; const VER='__VER__';
 // DINGs (seconds into the track): 0:16, then every 4s … 1:44, 1:48, short gap 1:50, 1:54, 1:58.
 // At DING[0] scene 1 appears and acting starts. At DING[k] (k>=1) scene k is "complete": its pictogram
 // pulses, then after GAP the next scene appears. After the last DING: 아멘. Music fades 2:04→2:20.
-const DING=Array.from({length:S.length+1},(_,k)=>16+4*k); if(S.length===26){DING[24]=110;DING[25]=114;DING[26]=118;}
-const GAP=0.35, FADE_FROM=124, FADE_TO=140;
+// Slides: slide 0 = 등장 (again), slide i = scene i-1. Slide i is shown from DING[i] to DING[i+1].
+// Music dings: 0:16, every 4s … 1:48, (short 1:50 skipped → that slide lasts 6s), 1:54, 1:58, 2:02, 2:06 = end → 아멘.
+const DING=Array.from({length:S.length+2},(_,i)=>16+4*i); if(S.length===26){DING[24]=114;DING[25]=118;DING[26]=122;DING[27]=126;}
+const GAP=0.35, FADE_FROM=132, FADE_TO=148;
 // SYNC: slides run this many seconds AHEAD of the audio clock, so the visual change lands on the ding. Adjust live with [ and ].
 let SYNC=parseFloat(localStorage.getItem('beeSync')||'0.15');
 
@@ -92,7 +94,7 @@ function mkSet(frame,onload,key){return IMGS.map(o=>{const im=new Image();let c=
 function setImg(set,k,fx){set.forEach(e=>e.classList.remove('on','pop','pulse'));if(k<-1||k>=S.length)return;const e=set[k+1];void e.offsetWidth;e.classList.add('on');if(fx&&k>=0)e.classList.add(fx)}
 // state at time t: {k: scene index (-1 intro, S.length = 아멘), pulse: true during the GAP right after a ding}
 function stateAt(t){if(t<DING[0])return {k:-1,pulse:false};let j=0;for(let i=0;i<DING.length;i++)if(t>=DING[i])j=i;
-  if(j>=1&&t<DING[j]+GAP)return {k:j-1,pulse:true};return {k:Math.min(j,S.length),pulse:false};}
+  if(t<DING[j]+GAP)return {k:Math.max(-1,j-2),pulse:j>=2};return {k:Math.min(j-1,S.length),pulse:false};}
 function flash(){const f=$('flash');f.style.transition='none';f.style.opacity=.85;requestAnimationFrame(()=>{f.style.transition='opacity .3s';f.style.opacity=0})}
 
 if(IS_AUD){ /* ================= TV / audience window ================= */
@@ -114,7 +116,7 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
   fetch('bgm.mp3?v='+VER).then(r=>r.blob()).then(b=>{A.src=URL.createObjectURL(b);audioOK=true;prog()}).catch(()=>{A.src='bgm.mp3';audioOK=true;prog()});
   setTimeout(()=>{if($('go').disabled){audioOK=true;loaded=2*IMGS.length;prog()}},20000);
   function prog(){const p=(loaded+(audioOK?1:0))/(2*IMGS.length+1);$('load').firstChild.style.width=(p*100)+'%';
-    if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='② ▶ 시작';$('info').textContent=S.length+'장면 · 0:16 첫 딩 = 1번 장면 시작 · 딩마다 완성 → 다음 장면 · 2:20 페이드아웃';}}
+    if(p>=1&&$('go').disabled){$('go').disabled=false;$('go').textContent='② ▶ 시작';$('info').textContent=S.length+'장면 · 0:16 첫 딩 = 등장(준비) · 0:20 = 1번 장면 시작 · 딩마다 완성 → 다음 장면';}}
   function openAud(){window.open(location.pathname+'?view=audience','bee_audience','popup,width=1280,height=720');setTimeout(ping,1500)}
   function ping(){audAlive=false;ch&&ch.postMessage({type:'ping'});setTimeout(()=>{$('audState').textContent=audAlive?'관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)':'관객 화면: 없음 (없으면 이 화면 하나로 재생)'},500)}
   ch&&ch.addEventListener('message',e=>{if(e.data.type==='pong'){audAlive=true;$('audState').textContent='관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)'}});
@@ -135,7 +137,7 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
     $('pTime').textContent=mmss(t)+'  ·  싱크 +'+SYNC.toFixed(2)+'s ([ / ])';$('pProg').firstChild.style.width=Math.min(100,t/FADE_TO*100)+'%';
     if(t>=FADE_FROM){const v=Math.max(0,1-(t-FADE_FROM)/(FADE_TO-FADE_FROM));A.volume=v;if(v<=0)A.pause();}else A.volume=1;
     raf=requestAnimationFrame(tick);}
-  function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=DING[k]+(k>0?GAP:0)+0.01-SYNC;}
+  function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=DING[k+1]+GAP+0.01-SYNC;}
   function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
   function start(){$('menu').style.display='none';$('pre').style.display='grid';cur=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
   function menu(){A.pause();cancelAnimationFrame(raf);ch&&ch.postMessage({type:'show',k:-99});cur=-99;$('pre').style.display='none';$('menu').style.display='flex';ping();}
