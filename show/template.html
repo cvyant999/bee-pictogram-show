@@ -82,7 +82,7 @@ const S=__SLIDES__; const VER='__VER__';
 // Slides: slide 0 = 등장 (again), slide i = scene i-1. Slide i is shown from DING[i] to DING[i+1].
 // Music dings: 0:16, every 4s … 1:48, (short 1:50 skipped → that slide lasts 6s), 1:54, 1:58, 2:02, 2:06 = end → 아멘.
 const DING=Array.from({length:S.length+2},(_,i)=>16+4*i); if(S.length===26){DING[24]=114;DING[25]=118;DING[26]=122;DING[27]=126;}
-const GAP=0.35, FADE_FROM=132, FADE_TO=148;
+const GAP=0.35, FADE_FROM=127, FADE_TO=137;
 // SYNC: slides run this many seconds AHEAD of the audio clock, so the visual change lands on the ding. Adjust live with [ and ].
 let SYNC=parseFloat(localStorage.getItem('beeSync')||'0.15');
 
