@@ -122,16 +122,18 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
   function ping(){audAlive=false;ch&&ch.postMessage({type:'ping'});setTimeout(()=>{$('audState').textContent=audAlive?'관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)':'관객 화면: 없음 (없으면 이 화면 하나로 재생)'},500)}
   ch&&ch.addEventListener('message',e=>{if(e.data.type==='pong'){audAlive=true;$('audState').textContent='관객 화면: 연결됨 ✅ (TV로 옮기고 전체화면)'}});
   $('openAud').onclick=openAud;$('reopen').onclick=openAud;
-  let cur=-99,ctx=null,raf=0;
+  let cur=-99,curA=-99,ctx=null,raf=0;
+  const ACTOR_AHEAD=0.15; // actors' screen switches to the next scene this long BEFORE the ding (no pulse wait)
   function shutter(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();const n=ctx.sampleRate*.09,b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);for(let k=0;k<n;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/n,3);const s=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.6;s.buffer=b;s.connect(g).connect(ctx.destination);s.start();}catch(e){}}
   function info(k,lbl,pose,staff){if(k>=S.length){lbl.textContent='아멘 🙏 (끝)';if(pose)pose.textContent='';if(staff)staff.textContent='';return}
     const o=IMGS[k+1];lbl.textContent=(k>=0?(k+1)+'. ':'')+o.t;if(pose)pose.textContent=o.pose||'';if(staff)staff.textContent=o.staff?('▶ '+o.staff):'';}
-  function show(st){const k=st.k;cur=k*2+(st.pulse?1:0);ch&&ch.postMessage({type:'show',k,pulse:st.pulse});
-    const fx=st.pulse?'pulse':'pop';setImg(nowSet,k,fx);setImg(nowSb,k,null);info(k,$('nowLbl'),$('nowPose'),$('nowStaff'));
-    const n=Math.min(k+1,S.length);setImg(nextSet,n<S.length?n:-99,null);setImg(nextSb,n<S.length?n:-99,null);info(n,$('nextLbl'),$('nextPose'));
-    if(st.pulse){flash();if($('click').checked)shutter();}}
+  function sendAud(st){curA=st.k*2+(st.pulse?1:0);ch&&ch.postMessage({type:'show',k:st.k,pulse:st.pulse});if(st.pulse){flash();if($('click').checked)shutter();}}
+  function show(st){const k=st.k;cur=k;
+    setImg(nowSet,k,'pop');setImg(nowSb,k,null);info(k,$('nowLbl'),$('nowPose'),$('nowStaff'));
+    const n=Math.min(k+1,S.length);setImg(nextSet,n<S.length?n:-99,null);setImg(nextSb,n<S.length?n:-99,null);info(n,$('nextLbl'),$('nextPose'));}
   const mmss=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
-  function tick(){const t=A.currentTime+SYNC,st=stateAt(t),key=st.k*2+(st.pulse?1:0);if(key!==cur)show(st);
+  function tick(){const t=A.currentTime+SYNC,st=stateAt(t),keyA=st.k*2+(st.pulse?1:0);if(keyA!==curA)sendAud(st);
+    const sa=stateAt(t+GAP+ACTOR_AHEAD);if(sa.k!==cur)show(sa);
     let j=-1;for(let i=0;i<DING.length;i++)if(t>=DING[i])j=i;const nb=j+1<DING.length?DING[j+1]:null,pb=j>=0?DING[j]:0;
     $('pCount').textContent=nb!=null?Math.max(0,nb-t).toFixed(1):'–';
     {const len=nb!=null?nb-pb:1,rem=nb!=null?Math.max(0,nb-t):0,f=nb!=null?Math.min(1,rem/len):0,b=$('cdBar').firstChild;b.style.width=(f*100)+'%';b.classList.toggle('hot',nb!=null&&rem<1);}
@@ -140,11 +142,11 @@ if(IS_AUD){ /* ================= TV / audience window ================= */
     raf=requestAnimationFrame(tick);}
   function seekScene(k){k=Math.max(0,Math.min(S.length-1,k));A.currentTime=DING[k+1]+GAP+0.01-SYNC;}
   function pause(){if(A.paused){A.play();$('paused').style.display='none'}else{A.pause();$('paused').style.display='block'}}
-  function start(){$('menu').style.display='none';$('pre').style.display='grid';cur=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
-  function menu(){A.pause();cancelAnimationFrame(raf);ch&&ch.postMessage({type:'show',k:-99});cur=-99;$('pre').style.display='none';$('menu').style.display='flex';ping();}
+  function start(){$('menu').style.display='none';$('pre').style.display='grid';cur=-99;curA=-99;A.currentTime=0;A.volume=1;A.play().catch(()=>{});cancelAnimationFrame(raf);tick();}
+  function menu(){A.pause();cancelAnimationFrame(raf);ch&&ch.postMessage({type:'show',k:-99});cur=-99;curA=-99;$('pre').style.display='none';$('menu').style.display='flex';ping();}
   $('go').onclick=start; window.__step=()=>{tick();cancelAnimationFrame(raf);};
   addEventListener('keydown',e=>{if($('menu').style.display!=='none'){if(e.key==='Enter'&&!$('go').disabled)start();return}
-    if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(Math.floor(cur/2)+1);else if(e.key==='ArrowLeft')seekScene(Math.floor(cur/2)-1);
+    if(e.key===' '){e.preventDefault();pause()}else if(e.key==='ArrowRight')seekScene(cur+1);else if(e.key==='ArrowLeft')seekScene(cur-1);
     else if(e.key===']'||e.key==='['){SYNC=Math.max(-0.5,Math.min(1,+(SYNC+(e.key===']'?0.05:-0.05)).toFixed(2)));localStorage.setItem('beeSync',SYNC);}
     else if(e.key==='m'||e.key==='M')A.muted=!A.muted;else if(e.key==='Escape')menu();});
 }
